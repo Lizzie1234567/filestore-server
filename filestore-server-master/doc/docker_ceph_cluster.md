@@ -8,6 +8,8 @@
 2023最新版！！！！！！
 https://blog.51cto.com/niuben/6367453?articleABtest=1
 
+只用看这个链接的内容就可以啦
+
 ```bash
 # 要用root用户创建, 或有sudo权限
 # 注: 建议使用这个docker镜像源:https://registry.docker-cn.com
