@@ -5,6 +5,26 @@
 ```bash
 docker pull mysql
 
+//启动存在的dockers
+sudo docker container start mysql-master;
+
+sudo docker container start mysql-slave;
+
+sudo docker ps;
+
+sudo netstat -antp | grep docker
+
+//终止已经存在的dockers
+docker container stop mysql-master
+
+docker container stop mysql-slave;
+
+
+docker container ls -a
+
+https://yeasy.gitbook.io/docker_practice/container/rm
+
+
 # 如果你只需要跑一个mysql实例，不做主从，那么执行以下命令即可，不用再做后面的参考步骤:
 docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
 #然后用shell或客户端软件通过配置( 用户名:root 密码:root IP:你的本机ip 端口:3306)来登录即可
