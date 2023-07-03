@@ -19,7 +19,7 @@ docker container stop mysql-master
 
 docker container stop mysql-slave;
 
-
+//查看所有已经创建的包括终止状态的容器
 docker container ls -a
 
 https://yeasy.gitbook.io/docker_practice/container/rm
