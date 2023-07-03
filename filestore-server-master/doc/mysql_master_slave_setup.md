@@ -3,11 +3,11 @@
 ## 1.拉取MySQL5.7镜像到本地
 
 ```bash
-docker pull mysql:5.7
+docker pull mysql
 
 # 如果你只需要跑一个mysql实例，不做主从，那么执行以下命令即可，不用再做后面的参考步骤:
 docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
-#然后用shell或客户端软件通过配置( 用户名:root 密码:132456 IP:你的本机ip 端口:3306)来登录即可
+#然后用shell或客户端软件通过配置( 用户名:root 密码:root IP:你的本机ip 端口:3306)来登录即可
 ```
 
 ## 2. 准备MySQL配置文件
@@ -47,26 +47,34 @@ replicate-do-db=fileserver  #需要复制的数据库名，需复制多个数据
 - 将mysql主节点运行起来
 ```bash
 mkdir -p /data/mysql/datam
-docker run -d --name mysql-master -p 13306:3306 -v /data/mysql/conf/master.conf:/etc/mysql/mysql.conf.d/mysqld.cnf -v /data/mysql/datam:/var/lib/mysql  -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
+docker run -d --name mysql-master -p 13306:3306 -v ./data/mysql/conf/master.conf:/etc/mysql/mysql.conf.d/mysqld.cnf -v ./data/mysql/datam:/var/lib/mysql  -e MYSQL_ROOT_PASSWORD=root mysql
 ```
 运行参数说明:
 >--name mysql-master: 容器的名称设为mysql-master
+>
 >-p 13306:3306: 将host的13306端口映射到容器的3306端口
->-v /data/mysql/conf/master.conf:/etc/mysql/mysql.conf.d/mysqld.cnf ： master.conf配置文件挂载
+>
+>-v ./data/mysql/conf/master.conf:/etc/mysql/mysql.conf.d/mysqld.cnf ： master.conf配置文件挂载
+>
 >-v /data/mysql/datam:/var/lib/mysql ： mysql容器内数据挂载到host的/data/mysql/datam， 用于持久化
->-e MYSQL_ROOT_PASSWORD=123456 : mysql的root登录密码为123456
+>
+>-e MYSQL_ROOT_PASSWORD=root : mysql的root登录密码为root
 
 - 将mysql从节点运行起来
 ```bash
 mkdir -p /data/mysql/datas
-docker run -d --name mysql-slave -p 13307:3306 -v /data/mysql/conf/slave.conf:/etc/mysql/mysql.conf.d/mysqld.cnf -v /data/mysql/datas:/var/lib/mysql  -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
+docker run -d --name mysql-slave -p 13307:3306 -v ./data/mysql/conf/slave.conf:/etc/mysql/mysql.conf.d/mysqld.cnf -v ./data/mysql/datas:/var/lib/mysql  -e MYSQL_ROOT_PASSWORD=root mysql
 ```
 运行参数说明:
 >--name mysql-slave: 容器的名称设为mysql-slave
+>
 >-p 13307:3306: 将host的13307端口映射到容器的3306端口
+>
 >-v /data/mysql/conf/slave.conf:/etc/mysql/mysql.conf.d/mysqld.cnf ： slave.conf配置文件挂载
+>
 >-v /data/mysql/datas:/var/lib/mysql ： mysql容器内数据挂载到host的/data/mysql/datas， 用于持久化
->-e MYSQL_ROOT_PASSWORD=123456 : mysql的root登录密码为123456
+>
+>-e MYSQL_ROOT_PASSWORD=root : mysql的root登录密码为root
 
 ## 4.登录MySQL主节点配置同步信息
 
@@ -74,17 +82,25 @@ docker run -d --name mysql-slave -p 13307:3306 -v /data/mysql/conf/slave.conf:/e
 ```
 # 192.168.1.xx 是你本机的内网ip
 mysql -u root -h 192.168.1.xx -P13306 -p123456
+mysql -uroot -h192.168.140.132 -P13306 -p;
+
 ```
 - 在mysql client中执行
 
 ```
-mysql> GRANT REPLICATION SLAVE ON *.* TO 'slave'@'%' IDENTIFIED BY 'slave';
+//mysql> GRANT REPLICATION SLAVE ON *.* TO 'slave'@'%' IDENTIFIED BY 'slave';
+
+mysql> create user 'slave'@'%' identified by 'slave';
+
+
+mysql> grant replication slave on *.* to 'slave'@'%'  with grant option;
+
 mysql> flush privileges;
 mysql> create database fileserver default character set utf8mb4;
 ```
 再获取status, 得到类似如下的输出:
 ```
-mysql> show master status G;
+mysql> show master status\G;
 *************************** 1. row ***************************
              File: log.000025
          Position: 155
@@ -100,18 +116,60 @@ Executed_Gtid_Set:
 ```shell
 # 192.168.1.xx 是你本机的内网ip
 mysql -u root -h 192.168.1.xx -P13307 -p123456
+mysql -uroot -h192.168.140.132 -P13307 -p;
+
 ```
 - 在mysql client中操作:
 
 ```
 mysql> stop slave;
+
+mysql> reset slave;
+
+
 #注意其中的日志文件和数值要和上面show master status的值对应
 mysql> CHANGE MASTER TO MASTER_HOST='你的本地ip地址如192.168.1.x',master_port=13306,MASTER_USER='slave',MASTER_PASSWORD='slave',MASTER_LOG_FILE='log.000025',MASTER_LOG_POS=155;
+
+mysql> CHANGE MASTER TO MASTER_HOST='192.168.140.132',master_port=13306,MASTER_USER='slave',MASTER_PASSWORD='slave',MASTER_LOG_FILE='binlog.000002',MASTER_LOG_POS=0;
+
 mysql> start slave;
+
+mysql> show slave status\G;
+
 ```
+## 出错改正办法：
+
+
+```
+（2）报错：Fatal error: The slave I/O thread stops because master and slave have equal MySQL server ids; these ids must be different for replication to work (or the --replicate-same-server-id option must be used on slave but this does not always make sense; please check the manual before using it)
+
+
+mysql> show variables like 'server_id';
+    +---------------+-------+
+    | Variable_name | Value |
+    +---------------+-------+
+    | server_id     | 1     |
+    +---------------+-------+
+    1 row in set (0.22 sec)
+    ###在数据库里看居然是一样的
+
+mysql>set global server_id=2; #此处的数值和my.cnf里设置的一样就行
+
+http://www.hebinghua.com/studydetail/13/38.html
+
+（1）报错：Last_IO_Error: error connecting to master 'replica@192.168.78.102:3306' - retry-time: 30 retries: 6 message: Authentication plugin 'caching_sha2_password' reported error: Authentication requires secure connection.
+
+- 在mysql client中执行：
+ALTER USER 'slave'@'%' IDENTIFIED WITH mysql_native_password BY 'slave';
+
+https://www.cnblogs.com/wtx106/p/16307911.html
+
+```
+
+
 再获取status, 正常应该得到类似如下的输出:
 ```
-mysql> show slave status G;
+mysql> show slave status\G;
 // ...
 Slave_IO_Running: Yes 
 Slave_SQL_Running: Yes 
