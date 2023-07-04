@@ -2,6 +2,9 @@
 
 ## 1.拉取MySQL5.7镜像到本地
 
+常用的 Vim 操作命令整理
+https://juejin.cn/post/7070699702732783623
+
 ```bash
 docker pull mysql
 
