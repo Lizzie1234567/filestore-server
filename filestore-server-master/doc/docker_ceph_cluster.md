@@ -8,6 +8,9 @@
 2023最新版！！！！！！
 https://blog.51cto.com/niuben/6367453?articleABtest=1
 
+https://stackoverflow.com/questions/26543787/docker-mule-server-curl-56-recv-failure-connection-reset-by-peer/26553296#26553296
+https://serverfault.com/questions/769578/curl-56-recv-failure-connection-reset-by-peer-when-hitting-docker-container
+
 只用看这个链接的内容就可以啦
 
 ```bash
