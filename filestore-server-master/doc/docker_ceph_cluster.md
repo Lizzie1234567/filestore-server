@@ -11,7 +11,7 @@ https://blog.51cto.com/niuben/6367453?articleABtest=1
 只用看这个链接的内容就可以啦
 
 ```bash
-
+以下是链接内容：
 1. 创建Ceph专用网络
 sudo docker network create --driver bridge --subnet 172.20.0.0/16 ceph-network
 
@@ -58,7 +58,7 @@ sudo docker exec ceph-mon ceph -s
 sudo docker exec ceph-rgw radosgw-admin user create --uid="test" --display-name="test user"
 
 
-## 2019版本已经过期了
+## 下面是2019版本，已经过期了，不用参考
 
 
 
