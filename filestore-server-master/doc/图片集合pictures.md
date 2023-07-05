@@ -8,7 +8,7 @@
 
 ## 微服务microservice
 ![文件上传演示2](../doc/microservice_interact_archi.png)
-![文件上传演示2](../doc/structure.png.png)
+![文件上传演示2](../doc/structure.png)
 ![文件上传演示2](../doc/云存储系统.png)
 ![文件上传演示2](../doc/课程技能树.png)
 
