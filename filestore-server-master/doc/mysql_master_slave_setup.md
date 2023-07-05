@@ -1,10 +1,22 @@
 (以下docker相关的命令，需要在root用户环境下或通过sudo提升权限来进行操作。)
 
-## 1.拉取MySQL5.7镜像到本地
-
+## 1.rabbitmq安装
 常用的 Vim 操作命令整理
 https://juejin.cn/post/7070699702732783623
 
+
+
+```bash
+sta@sta-virtual-machine:~$ sudo mkdir ./data/rabbitmq -p
+
+
+sudo docker run -d --hostname rabbit-svr --name rabbit -p 5672:5672 -p 15672:15672 -p 25672:25672 -v ./data/rabbitmq:/var/lib/rabbitmq rabbitmq:management
+
+sta@sta-virtual-machine:~$ sudo docker ps
+
+
+```
+## 1.拉取MySQL5.7镜像到本地
 ```bash
 docker pull mysql
 
