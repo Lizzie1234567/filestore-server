@@ -14,6 +14,10 @@ sudo docker run -d --hostname rabbit-svr --name rabbit -p 5672:5672 -p 15672:156
 
 sta@sta-virtual-machine:~$ sudo docker ps
 
+sudo docker exec -it rabbit rabbitmq-plugins enable rabbitmq_tracing
+rabbitmq启用日志功能记录消息队列收发情况：https://blog.csdn.net/fuck487/article/details/78677108
+
+
 
 ```
 ## 1.拉取MySQL5.7镜像到本地
